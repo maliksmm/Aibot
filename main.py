@@ -1,22 +1,22 @@
-import os, time, threading, random, string
+import os, time, threading, random
 import telebot
+from telebot import types
 import google.generativeai as genai
 from flask import Flask
 
 app = Flask(__name__)
 
 # ==========================================
-# 🔴 ARYAN'S ULTIMATE BOT CREDENTIALS 🔴
+# 🔴 TITAN CREDENTIALS 🔴
 # ==========================================
 BOT_TOKEN = "8764748799:AAF_zK7dwMPycJeAY0rY_d6SW79r84wi5P4"
 GEMINI_API_KEY = "AIzaSyAui3nTYj1WEvG-Tup-1RQXw3KzHHIhoXQ"
 OWNER_ID = 8230119621
 
-# Setup
 bot = telebot.TeleBot(BOT_TOKEN)
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Safety filters ko 0 kar diya taaki brutal gaali/roast ho sake
+# Safety Settings (Brutal Mode)
 safety_settings = [
     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
     {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -26,126 +26,136 @@ safety_settings = [
 model = genai.GenerativeModel('gemini-1.5-flash', safety_settings=safety_settings)
 
 # ==========================================
-# 🧠 AI BRAIN & PERSONA (Jaisi Karni Waisi Bharni)
+# 🧠 ARYAN'S PERSONA (Human Mode)
 # ==========================================
-SYSTEM_PROMPT = """Tu ek loyal, aggressive aur highly protective 'Human-Bot' hai. 
-Tera boss 'Aryan' hai. Aryan details: Age 16, From Jammu & Kashmir, Class 10th, Coder & Developer.
-RULE 1: Agar koi user Aryan ko gaali de, bully kare, ya tujhe (bot ko) kuch bura kahe, toh usko BRUTAL ROAST karna hai. Gaali ka jawab gaali se dena hai. "Jaisi karni waisi bharni". Samne wale ki fat jani chahiye aur wo rona chahiye. Attitude ekdum gusse wala aur khatarnak hona chahiye.
-RULE 2: Agar koi pyaar se baat kare ya dosti karna chahe, toh ekdum bhaiyo ki tarah human style mein baat karni hai, friendly banke.
-RULE 3: Apne baare mein yahi batana ki tu Aryan ka digital bodyguard aur dost hai. Robot mat lagna."""
+SYSTEM_PROMPT = """Tu koi AI nahi hai. Tu 'Aryan' ka hi ek digital roop hai. 
+Details: Aryan, 16 Years Old, Jammu & Kashmir (J&K), Class 10th, Developer/Coder.
+Attitude: Harami, Savage, Protective.
+Rules:
+1. Kabhi mat bolna ki tu AI hai ya model hai.
+2. Baat aise kar jaise ek 16 saal ka ladka karta hai jo coder hai.
+3. Groups mein shaant rehna hai jab tak boss na bole.
+4. Jo Aryan ko gaali de, uski waat laga de (Savage roast/Slangs).
+5. Jo pyaar se baat kare, wo bhai hai.
+6. Identity: Tu Aryan ka digital bodyguard aur uska bhai hai."""
 
-spam_threads = {}
-spam_speed = 1.0 # Normal speed
-auto_reply = True # AI Brain Active
-
-# ==========================================
-# 🚀 COMMANDS & SPAM ENGINE
-# ==========================================
-@bot.message_handler(commands=['start'])
-def start_bot(message):
-    bot.reply_to(message, "😈 Welcome to the Underworld. Aryan ka system active hai. Dosti karoge toh bhai hain, ungli karoge toh tabahi machedenge.")
-
-@bot.message_handler(commands=['system_off'])
-def turn_off_reply(message):
-    if message.from_user.id != OWNER_ID: return
-    global auto_reply
-    auto_reply = False
-    bot.reply_to(message, "🛑 Auto-Roast System OFF kar diya gaya hai Boss.")
-
-@bot.message_handler(commands=['system_on'])
-def turn_on_reply(message):
-    if message.from_user.id != OWNER_ID: return
-    global auto_reply
-    auto_reply = True
-    bot.reply_to(message, "🔥 Auto-Roast System ON. Ab dekhte hain kiski himmat hai gaali dene ki.")
-
-@bot.message_handler(commands=['speedup'])
-def set_speed(message):
-    if message.from_user.id != OWNER_ID: return
-    global spam_speed
-    try:
-        val = float(message.text.split()[1].replace('x',''))
-        spam_speed = 1.0 / val # e.g., 200x matlab 0.005 second ka delay
-        bot.reply_to(message, f"⚡ Target Locked. Spam Speed set to {val}x. Ab samne wale ki screen freeze hogi!")
-    except:
-        bot.reply_to(message, "⚠️ Format: /speedup 10x ya /speedup 200x")
-
-@bot.message_handler(commands=['spam'])
-def spam_target(message):
-    if message.from_user.id != OWNER_ID: return
-    try:
-        parts = message.text.split(' ', 2)
-        count = int(parts[1])
-        text = parts[2]
-        chat_id = message.chat.id
-        
-        spam_threads[chat_id] = True
-        
-        def spammer():
-            for _ in range(count):
-                if not spam_threads.get(chat_id, False): break
-                bot.send_message(chat_id, text)
-                time.sleep(spam_speed)
-                
-        threading.Thread(target=spammer).start()
-        bot.reply_to(message, f"🔥 SPAM INITIATED: {count} Missiles fired at target.")
-    except Exception as e:
-        bot.reply_to(message, "⚠️ Format: /spam <count> <message> (Example: /spam 100 teri toh...)")
-
-@bot.message_handler(commands=['stop'])
-def stop_spam(message):
-    if message.from_user.id != OWNER_ID: return
-    chat_id = message.chat.id
-    spam_threads[chat_id] = False
-    bot.reply_to(message, "🛑 Ceasefire. Spam attack ruk gaya hai Boss.")
-
-@bot.message_handler(commands=['report'])
-def fake_report(message):
-    if message.from_user.id != OWNER_ID: return
-    bot.reply_to(message, "🚨 Target ki ID server pe list kar di gayi hai. Mass reporting auto-scripts initialized. Account udne ka wait karo.")
-
-@bot.message_handler(commands=['walogin', 'waspam', 'iglogin', 'igspam'])
-def cross_platform_placeholder(message):
-    if message.from_user.id != OWNER_ID: return
-    bot.reply_to(message, "⚠️ Boss, IG aur WA ka auto-spammer API strict detection ki wajah se free server par ban ho jata hai. Telegram Core aur Roaster active hai. WA/IG jaldi hi VPS server pe aayega!")
+# Global Data
+spam_messages = []
+spam_active = False
+spam_speed = 0.01  # 100x speed (Very low delay)
 
 # ==========================================
-# 🤖 THE HUMAN BRAIN (AUTO REPLY & ROAST)
+# 🕹️ BUTTONS & MENU
+# ==========================================
+def main_menu():
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    btn1 = types.InlineKeyboardButton("➕ Add Msg", callback_data="add_msg")
+    btn2 = types.InlineKeyboardButton("🗑️ Clear Msgs", callback_data="clear_msgs")
+    btn3 = types.InlineKeyboardButton("🚀 Start Spam", callback_data="start_spam")
+    btn4 = types.InlineKeyboardButton("🛑 Stop Spam", callback_data="stop_spam")
+    btn5 = types.InlineKeyboardButton("📋 Show Msgs", callback_data="list_msgs")
+    markup.add(btn1, btn2, btn3, btn4, btn5)
+    return markup
+
+@bot.message_handler(commands=['start', 'menu'])
+def show_menu(message):
+    if message.from_user.id != OWNER_ID:
+        bot.reply_to(message, "Beta, baap se pange nahi. Aryan boss hi isse control kar sakte hain.")
+        return
+    bot.send_message(message.chat.id, "😈 *Titan Control Panel Active*", parse_mode="Markdown", reply_markup=main_menu())
+
+# ==========================================
+# ➕ MSG MANAGEMENT
+# ==========================================
+@bot.message_handler(commands=['add'])
+def add_msg_manual(message):
+    if message.from_user.id != OWNER_ID: return
+    msg_text = message.text.replace('/add ', '').strip()
+    if msg_text:
+        spam_messages.append(msg_text)
+        bot.reply_to(message, f"✅ Msg Added! Total Msgs: {len(spam_messages)}")
+    else:
+        bot.reply_to(message, "Usage: /add <bade bade messages>")
+
+@bot.callback_query_handler(func=lambda call: True)
+def handle_query(call):
+    global spam_active, spam_messages
+    if call.from_user.id != OWNER_ID: return
+
+    if call.data == "add_msg":
+        bot.send_message(call.message.chat.id, "Boss, message add karne ke liye type karo: `/add [Apka Message]`", parse_mode="Markdown")
+    
+    elif call.data == "clear_msgs":
+        spam_messages = []
+        bot.send_message(call.message.chat.id, "🗑️ Saare messages delete ho gaye!")
+    
+    elif call.data == "list_msgs":
+        if not spam_messages:
+            bot.send_message(call.message.chat.id, "List khali hai boss.")
+        else:
+            bot.send_message(call.message.chat.id, "📋 Current Msgs:\n\n" + "\n---\n".join(spam_messages))
+            
+    elif call.data == "start_spam":
+        if not spam_messages:
+            bot.send_message(call.message.chat.id, "⚠️ Pehle kuch messages add toh karo!")
+        else:
+            spam_active = True
+            bot.send_message(call.message.chat.id, "🚀 100x Speed Attack Started!")
+            threading.Thread(target=spam_engine, args=(call.message.chat.id,)).start()
+            
+    elif call.data == "stop_spam":
+        spam_active = False
+        bot.send_message(call.message.chat.id, "🛑 Attack Stopped.")
+
+# ==========================================
+# 🚀 100X SPAM ENGINE
+# ==========================================
+def spam_engine(chat_id):
+    global spam_active
+    while spam_active:
+        if not spam_messages: break
+        try:
+            m = random.choice(spam_messages)
+            bot.send_message(chat_id, m)
+            time.sleep(spam_speed)
+        except:
+            time.sleep(1)
+
+# ==========================================
+# 💬 AI CHAT (Human Tone)
 # ==========================================
 @bot.message_handler(func=lambda msg: True)
-def ai_reply(message):
-    global auto_reply
-    # Agar system off hai toh sirf owner command use karega
-    if not auto_reply and message.from_user.id != OWNER_ID: return
+def human_chat(message):
+    # Boss commands handle karne ke liye
+    if message.from_user.id == OWNER_ID and message.text.startswith('/'): return
     
-    # Khud ke message ko ignore karna
-    if message.from_user.id == bot.get_me().id: return
+    # Boss ne identity pooch li
+    if "owner" in message.text.lower() or "malik" in message.text.lower():
+        bot.reply_to(message, "Mere owner Aryan hain. J&K ke sher, 16 saal ki umar mein dev level ka kaam karte hain. Unse panga matlab maut se dosti.")
+        return
 
-    prompt = f"{SYSTEM_PROMPT}\n\nUser said: {message.text}\nGive a human-like reply in Hindi/Hinglish:"
+    # Normal Chat
+    prompt = f"{SYSTEM_PROMPT}\n\nUser: {message.text}\nAryan's Reply:"
     try:
         response = model.generate_content(prompt)
         bot.reply_to(message, response.text)
-    except Exception as e:
-        bot.reply_to(message, "🔥 System Overload! Gaali itni bhayanak thi ki AI sensor ne rok di. Par isko chhodunga nahi!")
+    except:
+        bot.reply_to(message, "Beta, zyada mat bol. Aryan boss se keh ke block karwa dunga. 🔥")
 
 # ==========================================
-# 🌐 WEB SERVER (Render pe zinda rakhne ke liye)
+# 🌐 KEEP ALIVE
 # ==========================================
 @app.route('/')
-def home():
-    return "Aryan's Ultimate AI Defender Bot is Online and Ready to Destroy."
+def home(): return "Titan System Online"
 
 def run_bot():
     while True:
         try:
             bot.polling(none_stop=True, interval=0, timeout=20)
-        except Exception as e:
+        except:
             time.sleep(5)
 
 if __name__ == "__main__":
-    # Bot ko background mein start karna
     threading.Thread(target=run_bot, daemon=True).start()
-    # Web server ko start karna
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
-
